@@ -1,3 +1,5 @@
+### Team members: Weizhao Li & Zhuolun Gao
+
 Project 1
 
 In this folder you'll find the sample receiver, code for computing and
