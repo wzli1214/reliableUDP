@@ -269,7 +269,7 @@ class Sender extends BasicSender {
 				System.out.println("Packet index: " + i);
 				this.msg_type = "data";
 	    		String msg = new String(chunk);
-				System.out.println("Read data is:  " + msg);
+//				System.out.println("Read data is:  " + msg);
 
 	    		if (this.seqno == 0) {
 	    			this.msg_type = "start";
@@ -279,7 +279,7 @@ class Sender extends BasicSender {
 	    		}
 	    		
 	    		String packet = this.make_packetString(msg_type, this.seqno, msg);
-				System.out.println("combined packet " + packet);
+//				System.out.println("combined packet " + packet);
 
 	    		
 	    		this.packetStrs[i] = packet;
@@ -400,21 +400,20 @@ class Sender extends BasicSender {
 
     public static void main(String[] args) throws Exception {
         
-        if (args.length != 3) {
+        if (args.length != 6) {
             System.out.println("Please follow the command format: " + 
-                "java Sender <filename> <port> <Destination address> ");
+                "java Sender -f <filename> -p <port> -a <Destination address> ");
         }
         
-        String filename = "/Users/weizhaoli/socketPro/reliableUDP/README.md";
+        String filename = "/Users/weizhaoli/socketPro/reliableUDP/README";
         String dAddress = "localhost";
         
         int dport = 33122;
         
         //real parameter
-//        filename = args[0];
-//        dAddress = args[2];
-//        
-//        dport = Integer.parseInt(args[1]);
+        filename = args[1];
+        dport = Integer.parseInt(args[3]);
+        dAddress = args[5];
         
         Sender sender = new Sender(dAddress, dport, filename, false); 
         

@@ -27,19 +27,19 @@ if __name__ == "__main__":
 
     port = 33122
     dest = "localhost"
-    filename = "/Users/weizhaoli/socketPro/reliableUDP/README.md"
+    filename = None
 
-    # for o,a in opts:
-    #     if o in ("-f", "--file="):
-    #         filename = a
-    #     elif o in ("-p", "--port="):
-    #         port = int(a)
-    #     elif o in ("-a", "--address="):
-    #         dest = a
+    for o,a in opts:
+        if o in ("-f", "--file="):
+            filename = a
+        elif o in ("-p", "--port="):
+            port = int(a)
+        elif o in ("-a", "--address="):
+            dest = a
 
     # Change this to your java program's main class
     javaclass = "Sender"
     # You may need to add other arguments such as setting the class path
     # You should do add these before the javaclass variable
-    subprocess.call(["java", javaclass, filename, str(port), dest])
+    subprocess.call(["java", javaclass, "-f", filename, "-p", str(port), "-a", dest])
     
