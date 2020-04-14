@@ -15,9 +15,33 @@ you want to run. The tests automatically register themselves with the
 forwarder, so they will magically be run.
 """
 def tests_to_run(forwarder):
-    from tests import BasicTest, RandomDropTest
-    BasicTest.BasicTest(forwarder, "README")
-    RandomDropTest.RandomDropTest(forwarder, "README")
+    from tests import BasicTest, RandomDropTest, DropAndDuplicatePacketTest, DuplicatePacketTest, DelayPacketTest, ReorderedPacketTest, RandomCorruptTest, PrintDropTest, PrintNoDropTest
+    
+    ## Basic tests, no drops. You better pass this!
+    # BasicTest.BasicTest(forwarder, "README")
+    
+    ## Tests to help with debugging
+    # No drops, but print all packets sent
+    PrintNoDropTest.PrintNoDropTest(forwarder, "README")
+    # Drop second packet, exit after 50 packets and use larger file
+    PrintDropTest.PrintDropTest(forwarder, "README-4x", 50)
+
+    ## More complex tests of full functionality small files
+    # RandomDropTest.RandomDropTest(forwarder, "README")
+    # RandomCorruptTest.RandomCorruptTest(forwarder, "README")
+    # DuplicatePacketTest.DuplicatePacketTest(forwarder, "README")
+    # DropAndDuplicatePacketTest.DropAndDuplicatePacketTest(forwarder, "README")
+    # DelayPacketTest.DelayPacketTest(forwarder, "README")
+    # ReorderedPacketTest.ReorderedPacketTest(forwarder, "README")
+
+    ## More complex tests, bigger files
+    # # BasicTest.BasicTest(forwarder, "README-4x")
+    # RandomDropTest.RandomDropTest(forwarder, "README-4x")
+    # RandomCorruptTest.RandomCorruptTest(forwarder, "README-4x")
+    # DuplicatePacketTest.DuplicatePacketTest(forwarder, "README-4x")
+    # DropAndDuplicatePacketTest.DropAndDuplicatePacketTest(forwarder, "README-4x")
+    # DelayPacketTest.DelayPacketTest(forwarder, "README-4x")
+    # ReorderedPacketTest.ReorderedPacketTest(forwarder, "README-4x")
 
 """
 Testing is divided into two pieces: this forwarder and a set of test cases in
@@ -73,7 +97,9 @@ class Forwarder(object):
         self.test_state = "INIT"
         self.tick_interval = 0.001 # 1ms
         self.last_tick = time.time()
-        self.timeout = 600. # seconds
+        self.timeout = 30. # seconds
+        self.passed = 0
+        self.failed = 0
 
         # network stuff
         self.port = port
@@ -108,6 +134,8 @@ class Forwarder(object):
         for (t, input_file) in self.tests:
             self.current_test = t
             self.start(input_file)
+            time.sleep(0.2)
+        print "FINAL: passed %d failed %d tests" % (self.passed, self.failed)
 
     def handle_receive(self, message, address):
         """
@@ -150,6 +178,8 @@ class Forwarder(object):
         self.in_queue = []
         self.out_queue = []
 
+        print "Starting %s " % self.current_test
+
         receiver = subprocess.Popen(["python", self.receiver_path,
                                      "-p", str(self.receiver_port)])
         time.sleep(0.2) # make sure the receiver is started first
@@ -168,7 +198,9 @@ class Forwarder(object):
                     self.last_tick = time.time()
                     self._tick()
                 if time.time() - start_time > self.timeout:
-                    raise Exception("Test timed out!")
+                    # raise Exception("Test timed out!")
+                    print "Test timed out!"
+                    break
             self._tick()
         except (KeyboardInterrupt, SystemExit):
             exit()
@@ -190,7 +222,10 @@ class Forwarder(object):
 
         if not os.path.exists(self.recv_outfile):
           raise RuntimeError("No data received by receiver!")
-        self.current_test.result(self.recv_outfile)
+        if (self.current_test.result(self.recv_outfile) == True):
+            self.passed += 1
+        else:
+            self.failed += 1
 
 class Packet(object):
     def __init__(self, packet, address, start_seqno_base):

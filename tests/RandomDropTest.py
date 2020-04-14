@@ -13,8 +13,11 @@ create your own.
 class RandomDropTest(BasicTest):
     def handle_packet(self):
         for p in self.forwarder.in_queue:
-            if random.choice([True, False]):
+            if random.choice(range(1, 3)) > 1 or p.msg_type != "data":
+                print p, " sent"
                 self.forwarder.out_queue.append(p)
+            else:
+                print p, " dropped"
 
         # empty out the in_queue
         self.forwarder.in_queue = []

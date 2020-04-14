@@ -1,5 +1,6 @@
 import hashlib
 import os
+import sys
 
 """
 This file contains a basic test case that just passes packets through the
@@ -68,10 +69,10 @@ class BasicTest(object):
         if not os.path.exists(receiver_outfile):
             raise ValueError("No such file %s" % str(receiver_outfile))
         if self.files_are_the_same(self.input_file, receiver_outfile):
-            print "Test passes!"
+            print >> sys.stderr, "Test %s passes for file %s " % (self, self.input_file)
             return True
         else:
-            print "Test fails: original file doesn't match received. :("
+            print >> sys.stderr, "Test %s fails: original file %s doesn't match received %s. :(" % (self, self.input_file, receiver_outfile)
             return False
 
     # Utility methods -- not necessary, just helpful for writing tests
