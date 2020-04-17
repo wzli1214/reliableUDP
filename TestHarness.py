@@ -18,13 +18,17 @@ def tests_to_run(forwarder):
     from tests import BasicTest, RandomDropTest, DropAndDuplicatePacketTest, DuplicatePacketTest, DelayPacketTest, ReorderedPacketTest, RandomCorruptTest, PrintDropTest, PrintNoDropTest
     
     ## Basic tests, no drops. You better pass this!
-    # BasicTest.BasicTest(forwarder, "README")
-    
+    BasicTest.BasicTest(forwarder, "README")
+    # BasicTest.BasicTest(forwarder, "README-4x")
+    # RandomDropTest.RandomDropTest(forwarder, "README-4x")
+
     ## Tests to help with debugging
     # No drops, but print all packets sent
-    PrintNoDropTest.PrintNoDropTest(forwarder, "README")
-    # Drop second packet, exit after 50 packets and use larger file
+    # PrintNoDropTest.PrintNoDropTest(forwarder, "README")
     PrintDropTest.PrintDropTest(forwarder, "README-4x", 50)
+
+    # Drop second packet, exit after 50 packets and use larger file
+    # PrintDropTest.PrintDropTest(forwarder, "README-4x", 50)
 
     ## More complex tests of full functionality small files
     # RandomDropTest.RandomDropTest(forwarder, "README")
@@ -35,7 +39,7 @@ def tests_to_run(forwarder):
     # ReorderedPacketTest.ReorderedPacketTest(forwarder, "README")
 
     ## More complex tests, bigger files
-    # # BasicTest.BasicTest(forwarder, "README-4x")
+    # BasicTest.BasicTest(forwarder, "README-4x")
     # RandomDropTest.RandomDropTest(forwarder, "README-4x")
     # RandomCorruptTest.RandomCorruptTest(forwarder, "README-4x")
     # DuplicatePacketTest.DuplicatePacketTest(forwarder, "README-4x")

@@ -32,7 +32,7 @@ class CheckSum {
 	}
 	
 }
-
+//*****************************************************************/
 //Basic Sender
 abstract class BasicSender {
 	protected boolean debug;
@@ -113,7 +113,7 @@ abstract class BasicSender {
         String body = String.format("%s|%d|%s|", msg_type, seqno, data);
         CheckSum checksumUse = new CheckSum(); 
         long checksum = checksumUse.generate_checksum(body.getBytes());
-        String packet = String.format("%s%s", body, checksum);
+        String packet = String.format("%s%d", body, checksum);
         return packet;
     }
  
@@ -146,6 +146,7 @@ abstract class BasicSender {
 }
 
 //Sender
+//*****************************************************************/
 class Sender extends BasicSender {
     
 	//sliding window size is 5
@@ -196,6 +197,10 @@ class Sender extends BasicSender {
     				
     			}
     			
+    			System.out.println("*********len of received_acks*************");
+    			System.out.println("len of received_acks: " + received_acks.length);
+    			
+    			//check later
     			if (this.msg_type.equals("end")) {
     				System.out.println("Transfer complete!");
     				break;
@@ -203,14 +208,24 @@ class Sender extends BasicSender {
     			
     			
     			//GO-BACK-N
-    			int[] ackNos = this.parse_acks(received_acks);
+    			int[] ackNos = new int[5];
+    			Arrays.fill(ackNos, -1);
+    			ackNos = this.parse_acks(received_acks);
+    			
+    			//test
+    			for (int i = 0; i < 5; i++) {
+    				System.out.println("************ackNos[i]*****************");
+    				System.out.println("ackNos " + "[" + i + "]" + "is  " + ackNos[i]);
+
+    			}
+    			
     			int errorCode = this.check_for_error(ackNos);
     			
 //    			int checkSumErrorCode = this.check_for_checksum(received_acks);
 //    			
 //    			System.out.println("Check for check sum, checkSumErrorCode is " + checkSumErrorCode);
-    			
-    			
+    			System.out.println("****************errorCode*******************"  );
+    			System.out.println("errorCode: " + errorCode);
     			//errorCode == -1 means no error
     			if (errorCode != -1) {
     				System.out.println("Error");
@@ -228,6 +243,7 @@ class Sender extends BasicSender {
     					System.out.println("Duplicated error at index" + errorIdx);
     					
     					if (ackNos[errorIdx] != this.seqno) {
+    						System.out.println("resend package from " + errorIdx +" to" + this.packetsfilled);
     						this.send_packets_from_to(errorIdx, this.packetsfilled);
     					}
     					
@@ -241,9 +257,14 @@ class Sender extends BasicSender {
     			}
     			
     			else if (this.completed_window(ackNos)) {
+    				System.out.println("*********Complete window*********");
     				completedWindow = true;
+    				continue;
     			}
     			
+    			
+    			System.out.println("********* window not complete*********");
+    			 
     		}
     			
     	}
@@ -266,10 +287,12 @@ class Sender extends BasicSender {
     		
     		try {
 				int readCode = super.fis.read(chunk);
-				System.out.println("Packet index: " + i);
+				System.out.println("Packet index: " + i + " readCode " + readCode);
 				this.msg_type = "data";
 	    		String msg = new String(chunk);
-//				System.out.println("Read data is:  " + msg);
+				System.out.println("Read data is:  ");
+				System.out.println(msg);
+
 
 	    		if (this.seqno == 0) {
 	    			this.msg_type = "start";
@@ -283,8 +306,8 @@ class Sender extends BasicSender {
 
 	    		
 	    		this.packetStrs[i] = packet;
-	    		this.seqno++;
-	    		this.packetsfilled++;
+	    		this.seqno += 1;
+	    		this.packetsfilled += 1;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -306,18 +329,36 @@ class Sender extends BasicSender {
     //ackNos[i] == -1 means there is no ackNo for this index
     public int[] parse_acks(DatagramPacket[] received_acks) {
     	int[] ackNos = new int[5];
+    	//-1 is default code
     	Arrays.fill(ackNos, -1);
     	
     	for (int i = 0; i < 5; i++) {
-    		if (received_acks[i] != null) {
+//    		if (received_acks[i] == null)
+    		
+    		System.out.println("Starting process received ack " + i);
+//    		System.out.println("received ack " + received_acks[i]);
+    		
+//    		if (received_acks[i] != null) {
     			
     			String strData = this.packetToString(received_acks[i]);
-    			
-    			//check 没收到数据
-    			String[] splitData = strData.split("\\|");
-    			System.out.println("Received checksum of packet " + i + "is "+ splitData[2]);
+    			System.out.println("parseResult of index " + i +  " package is " + strData);
 
-     			
+    			System.out.println("packetToString of received_acks " + i + " done");
+    			
+    			String[] splitData = strData.split("\\|");
+    			System.out.println("len of splitData of this package is " + splitData.length);
+    			
+    			//if msg data is empty
+    			//mark ackNos of this package as -2
+    			if (splitData.length ==1 ) {
+    				ackNos[i] = -2;
+    				continue;
+    			}
+//    			System.out.println("Received checksum of packet " + i + "is "+ splitData[2]);
+    			
+    			System.out.println("******************Received msg**********************");
+    			
+     			System.out.println("Received msg :" + splitData[0] + " " + splitData[1]);
     			try {
     				ackNos[i] = Integer.parseInt(splitData[1]);
     				System.out.println("ackNos[i] is " + ackNos[i]);
@@ -326,19 +367,24 @@ class Sender extends BasicSender {
 
     			}
     		
-    		}
+//    		}
+    		
+    		System.out.println("package " + i + "processed");
     		
     	}
     	return ackNos;
     }
     
     //check loss error or duplicated
-    //error code -1 means no error
+    //return value error code -1 means no error
+    //otherwise, if return value is <10, then the return value is the index of incorrect package
+    //if the return value is > 10, then the duplicate ack appears at index : (return value - 10)
+    //ackNos[i] = -2 means empty data
     public int check_for_error(int[] ackNos) {
     	for (int i = 0; i < 4; i++) {
-    		if (ackNos[i] == -1)
+    		if (ackNos[i] == -2)
     			return i;
-    		else if(ackNos[i + 1] == -1) {
+    		else if(ackNos[i + 1] == -2) {
     			return i + 1;
     		}
     		
@@ -376,7 +422,7 @@ class Sender extends BasicSender {
     
     public boolean completed_window(int[] ackNos) {
     	for (int i = 0; i < 5; i++) {
-    		if (ackNos[i] == -1)
+    		if (ackNos[i] == -2)
     			return false;
     	}
     	
@@ -405,7 +451,7 @@ class Sender extends BasicSender {
                 "java Sender -f <filename> -p <port> -a <Destination address> ");
         }
         
-        String filename = "/Users/weizhaoli/socketPro/reliableUDP/README";
+        String filename = "/Users/weizhaoli/socketPro/reliableUDP/README-3round";
         String dAddress = "localhost";
         
         int dport = 33122;
