@@ -18,7 +18,7 @@ def tests_to_run(forwarder):
     from tests import BasicTest, RandomDropTest, DropAndDuplicatePacketTest, DuplicatePacketTest, DelayPacketTest, ReorderedPacketTest, RandomCorruptTest, PrintDropTest, PrintNoDropTest
     
     ## Basic tests, no drops. You better pass this!
-    BasicTest.BasicTest(forwarder, "README")
+    # BasicTest.BasicTest(forwarder, "README")
     # BasicTest.BasicTest(forwarder, "README-4x")
     # RandomDropTest.RandomDropTest(forwarder, "README-4x")
 
