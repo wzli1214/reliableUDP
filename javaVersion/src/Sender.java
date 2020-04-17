@@ -289,7 +289,23 @@ class Sender extends BasicSender {
 				int readCode = super.fis.read(chunk);
 				System.out.println("Packet index: " + i + " readCode " + readCode);
 				this.msg_type = "data";
-				String msg = new String(chunk);
+				String msg;
+				
+				if (readCode == 1450) {
+					msg = new String(chunk);
+				} 
+				
+				//end|seq| |checksum
+				else if (readCode == -1) {
+					msg = "";
+				}
+				
+				else {
+					msg = new String(chunk, 0, readCode);
+				}
+				
+				
+//				String msg = new String(chunk);
 				System.out.println("Read data is:  ");
 				System.out.println(msg);
 
@@ -458,7 +474,7 @@ class Sender extends BasicSender {
 					+ "java Sender -f <filename> -p <port> -a <Destination address> ");
 		}
 
-		String filename = "/Users/weizhaoli/socketPro/reliableUDP/README-3round";
+		String filename = "/Users/weizhaoli/socketPro/reliableUDP/README";
 		String dAddress = "localhost";
 
 		int dport = 33122;

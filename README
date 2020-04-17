@@ -85,7 +85,10 @@ Testing
 =======
 You are expected to write test cases for your own code to ensure compliance
 with the project specifications. To assist you, we've given you a simple test
-harness (TestHarness.py). The test harness is designed to intercept all packets
+harness (TestHarness.py). The test harness is designed
+
+
+ to intercept all packets
 sent between your sender and the receiver. It can modify the stream of packets
 and check to ensure the stream meets certain conditions. This is very similar
 to the grading script that we will use to evaluate your projects.
