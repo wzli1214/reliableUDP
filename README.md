@@ -6,7 +6,7 @@ In this project, I built a simple reliable transport protocol known as reliable 
 
 There are a variety of ways to ensure a message is reliably delivered from a sender to a receiver. UC Berkeley EE 122 provided you with a reference implementation of a receiver (in Python) that returns a cumulative ACK whenever it receives a data packet. My job is to implement a sender in Java via Go-Back-N, when sending packets to this receiver, achieves reliable delivery. 
 
-**keywords: Go-Back-N, Java, Reliable UDP**
+**keywords: Sliding Window, Go-Back-N, Java, Checksum, Reliable UDP**
 
 # The Reliable UDP Protocol 
 Our simple protocol has four message types: `start`, `end`, `data`, and `ack`. `start`, `end`, and
